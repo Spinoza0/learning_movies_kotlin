@@ -1,13 +1,10 @@
 package com.spinoza.movieskotlin.presentation.viewmodel
 
-import android.app.Application
-import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.spinoza.movieskotlin.data.ApiFactory
-import com.spinoza.movieskotlin.data.MovieDao
-import com.spinoza.movieskotlin.data.MovieDatabase
+import androidx.lifecycle.ViewModel
+import com.spinoza.movieskotlin.domain.MoviesApiService
+import com.spinoza.movieskotlin.domain.MovieDao
 import com.spinoza.movieskotlin.domain.links.Link
 import com.spinoza.movieskotlin.domain.movies.Movie
 import com.spinoza.movieskotlin.domain.reviews.Review
@@ -17,54 +14,51 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class MovieDetailViewModel(application: Application) : AndroidViewModel(application) {
-    companion object {
-        private const val TAG = "MovieDetailViewModel"
-    }
+class MovieDetailViewModel(
+    private val movieDao: MovieDao,
+    private val apiService: MoviesApiService,
+) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
     private val links: MutableLiveData<List<Link>> = MutableLiveData<List<Link>>()
     private val reviews: MutableLiveData<List<Review>> = MutableLiveData<List<Review>>()
-    private val movieDao: MovieDao
-
-    init {
-        movieDao = MovieDatabase.getInstance(application).movieDao()
-    }
+    private val error = MutableLiveData<String>()
 
     fun getFavouriteMovie(id: Int) = movieDao.getFavouriteMovie(id)
     fun getReviews(): LiveData<List<Review>> = reviews
     fun getLinks(): LiveData<List<Link>> = links
+    fun isError(): LiveData<String> = error
 
     fun loadLinks(id: Int) {
-        val disposable: Disposable = ApiFactory.apiService.loadLinks(id)
+        val disposable: Disposable = apiService.loadLinks(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { linkResponse -> linkResponse.linkItemsList.items }
-            .subscribe(links::setValue) { throwable -> Log.d(TAG, throwable.toString()) }
+            .subscribe(links::setValue) { throwable -> error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
     fun loadReviews(id: Int) {
-        val disposable: Disposable = ApiFactory.apiService.loadReviews(id)
+        val disposable: Disposable = apiService.loadReviews(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map(ReviewsResponse::reviews)
             .subscribe(reviews::setValue
-            ) { throwable -> Log.e(TAG, throwable.toString()) }
+            ) { throwable -> error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
     fun insertMovie(movie: Movie) {
         val disposable: Disposable = movieDao.insertMovie(movie)
             .subscribeOn(Schedulers.io())
-            .subscribe({}) { throwable -> Log.e(TAG, throwable.toString()) }
+            .subscribe({}) { throwable -> error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
     fun removeMovie(movieId: Int) {
         val disposable: Disposable = movieDao.removeMovie(movieId)
             .subscribeOn(Schedulers.io())
-            .subscribe({}) { throwable -> Log.e(TAG, throwable.toString()) }
+            .subscribe({}) { throwable -> error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 

@@ -1,4 +1,4 @@
-package com.spinoza.movieskotlin.data
+package com.spinoza.movieskotlin.domain
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao

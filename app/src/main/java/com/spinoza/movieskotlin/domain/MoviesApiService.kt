@@ -1,4 +1,4 @@
-package com.spinoza.movieskotlin.data
+package com.spinoza.movieskotlin.domain
 
 import com.spinoza.movieskotlin.domain.links.LinkResponse
 import com.spinoza.movieskotlin.domain.movies.MoviesResponse
@@ -7,7 +7,7 @@ import io.reactivex.rxjava3.core.Single
 import retrofit2.http.GET
 import retrofit2.http.Query
 
-interface ApiService {
+interface MoviesApiService {
     companion object {
         private const val SPINOZA_TOKEN = "S2TJTAC-GC24QA2-P191MTM-RWK2ZP1"
     }

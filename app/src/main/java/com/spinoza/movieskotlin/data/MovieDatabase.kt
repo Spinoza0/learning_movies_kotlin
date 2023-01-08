@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
+import com.spinoza.movieskotlin.domain.MovieDao
 import com.spinoza.movieskotlin.domain.movies.Movie
 
 @Database(entities = [Movie::class], version = 1, exportSchema = false)

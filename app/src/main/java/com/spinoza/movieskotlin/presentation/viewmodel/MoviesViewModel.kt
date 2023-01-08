@@ -1,11 +1,9 @@
 package com.spinoza.movieskotlin.presentation.viewmodel
 
-import android.app.Application
-import android.util.Log
-import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
-import com.spinoza.movieskotlin.data.ApiFactory
+import androidx.lifecycle.ViewModel
+import com.spinoza.movieskotlin.domain.MoviesApiService
 import com.spinoza.movieskotlin.domain.movies.Movie
 import com.spinoza.movieskotlin.presentation.MoviesListShowable
 import io.reactivex.rxjava3.android.schedulers.AndroidSchedulers
@@ -13,20 +11,19 @@ import io.reactivex.rxjava3.disposables.CompositeDisposable
 import io.reactivex.rxjava3.disposables.Disposable
 import io.reactivex.rxjava3.schedulers.Schedulers
 
-class MoviesViewModel(application: Application) : AndroidViewModel(application),
+class MoviesViewModel(private val apiService: MoviesApiService) : ViewModel(),
     MoviesListShowable {
-    companion object {
-        private const val TAG = "MainViewModel"
-    }
-
     private val movies = MutableLiveData<MutableList<Movie>>()
     private val isLoading = MutableLiveData(false)
+    private val error = MutableLiveData<String>()
     private val compositeDisposable = CompositeDisposable()
 
     private var page = 1
 
     override fun getMovies(): LiveData<MutableList<Movie>> = movies
     override fun getIsLoading(): LiveData<Boolean> = isLoading
+
+    fun isError(): LiveData<String> = error
 
     init {
         loadMovies()
@@ -36,7 +33,7 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application),
         val loading = isLoading.value
         loading?.let {
             if (!it) {
-                val disposable: Disposable = ApiFactory.apiService.loadMovies(page)
+                val disposable: Disposable = apiService.loadMovies(page)
                     .subscribeOn(Schedulers.io())
                     .doOnSubscribe { isLoading.setValue(true) }
                     .observeOn(AndroidSchedulers.mainThread())
@@ -47,7 +44,7 @@ class MoviesViewModel(application: Application) : AndroidViewModel(application),
                         movies.value?.let { loadedMovies.addAll(moviesResponse.movies) }
                         movies.value = loadedMovies
                         page++
-                    }) { throwable -> Log.e(TAG, throwable.toString()) }
+                    }) { throwable -> error.value = throwable.toString() }
                 compositeDisposable.add(disposable)
             }
         }

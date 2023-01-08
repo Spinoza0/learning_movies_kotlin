@@ -5,8 +5,10 @@ import android.content.Intent
 import android.os.Bundle
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import com.spinoza.movieskotlin.data.MovieDatabase
 import com.spinoza.movieskotlin.databinding.ActivityFavouriteMoviesBinding
 import com.spinoza.movieskotlin.presentation.viewmodel.FavouriteMoviesViewModel
+import com.spinoza.movieskotlin.presentation.viewmodel.FavouriteMoviesViewModelFactory
 
 class FavouriteMoviesActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -15,8 +17,10 @@ class FavouriteMoviesActivity : AppCompatActivity() {
             .inflate(layoutInflater)
         setContentView(binding.root)
 
-        val viewModel: FavouriteMoviesViewModel =
-            ViewModelProvider(this)[FavouriteMoviesViewModel::class.java]
+        val viewModel: FavouriteMoviesViewModel = ViewModelProvider(
+            this,
+            FavouriteMoviesViewModelFactory(MovieDatabase.getInstance(application).movieDao())
+        )[FavouriteMoviesViewModel::class.java]
 
         MoviesList(
             this,

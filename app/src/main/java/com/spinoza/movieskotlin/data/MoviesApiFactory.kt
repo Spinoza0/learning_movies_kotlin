@@ -1,10 +1,11 @@
 package com.spinoza.movieskotlin.data
 
+import com.spinoza.movieskotlin.domain.MoviesApiService
 import retrofit2.Retrofit
 import retrofit2.adapter.rxjava3.RxJava3CallAdapterFactory
 import retrofit2.converter.gson.GsonConverterFactory
 
-object ApiFactory {
+object MoviesApiFactory {
     private const val BASE_URL = "https://api.kinopoisk.dev/"
     private val retrofit = Retrofit.Builder()
         .baseUrl(BASE_URL)
@@ -13,5 +14,5 @@ object ApiFactory {
         .build()
 
     @JvmField
-    val apiService: ApiService = retrofit.create(ApiService::class.java)
+    val apiService: MoviesApiService = retrofit.create(MoviesApiService::class.java)
 }

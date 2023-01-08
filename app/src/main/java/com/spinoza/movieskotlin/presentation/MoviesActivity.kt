@@ -3,11 +3,14 @@ package com.spinoza.movieskotlin.presentation
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
 import com.spinoza.movieskotlin.R
+import com.spinoza.movieskotlin.data.MoviesApiFactory
 import com.spinoza.movieskotlin.databinding.ActivityMoviesBinding
 import com.spinoza.movieskotlin.presentation.viewmodel.MoviesViewModel
+import com.spinoza.movieskotlin.presentation.viewmodel.MoviesViewModelFactory
 
 class MoviesActivity : AppCompatActivity() {
 
@@ -15,7 +18,12 @@ class MoviesActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         val binding: ActivityMoviesBinding = ActivityMoviesBinding.inflate(layoutInflater)
         setContentView(binding.root)
-        val viewModel = ViewModelProvider(this)[MoviesViewModel::class.java]
+
+        val viewModel = ViewModelProvider(
+            this,
+            MoviesViewModelFactory(MoviesApiFactory.apiService)
+        )[MoviesViewModel::class.java]
+
         MoviesList(
             this,
             viewModel,
@@ -29,6 +37,10 @@ class MoviesActivity : AppCompatActivity() {
             },
             { viewModel.loadMovies() }
         )
+
+        viewModel.isError().observe(this) {
+            Toast.makeText(this, it, Toast.LENGTH_LONG).show()
+        }
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {

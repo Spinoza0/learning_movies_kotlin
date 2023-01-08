@@ -6,16 +6,20 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
+import android.widget.Toast
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
+import com.spinoza.movieskotlin.data.MoviesApiFactory
+import com.spinoza.movieskotlin.data.MovieDatabase
 import com.spinoza.movieskotlin.databinding.ActivityMovieDetailBinding
 import com.spinoza.movieskotlin.domain.movies.Movie
 import com.spinoza.movieskotlin.presentation.adapter.LinksAdapter
 import com.spinoza.movieskotlin.presentation.adapter.ReviewsAdapter
 import com.spinoza.movieskotlin.presentation.viewmodel.MovieDetailViewModel
+import com.spinoza.movieskotlin.presentation.viewmodel.MovieDetailViewModelFactory
 
 class MovieDetailActivity : AppCompatActivity() {
     private lateinit var binding: ActivityMovieDetailBinding
@@ -29,7 +33,13 @@ class MovieDetailActivity : AppCompatActivity() {
         binding = ActivityMovieDetailBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        viewModel = ViewModelProvider(this)[MovieDetailViewModel::class.java]
+        viewModel = ViewModelProvider(
+            this,
+            MovieDetailViewModelFactory(
+                MovieDatabase.getInstance(application).movieDao(),
+                MoviesApiFactory.apiService
+            )
+        )[MovieDetailViewModel::class.java]
 
         linksAdapter = LinksAdapter()
         linksAdapter.onLinkClickListener = {
@@ -49,42 +59,43 @@ class MovieDetailActivity : AppCompatActivity() {
 
     private fun setContent(movie: Movie) {
         with(binding) {
-            Glide.with(this@MovieDetailActivity)
-                .load(movie.poster.url)
-                .into(imageViewPoster)
-            textViewName.text = movie.name
-            textViewYear.text = movie.year.toString()
-            textViewDescription.text = movie.description
-            viewModel.loadLinks(movie.id)
-            viewModel.getLinks().observe(this@MovieDetailActivity) { links ->
-                linksAdapter.setLinks(links)
-            }
-            viewModel.getReviews().observe(this@MovieDetailActivity) { reviewItems ->
-                reviewsAdapter.setReviews(reviewItems)
-            }
-            viewModel.loadReviews(movie.id)
+            with(viewModel) {
+                Glide.with(this@MovieDetailActivity)
+                    .load(movie.poster.url)
+                    .into(imageViewPoster)
+                textViewName.text = movie.name
+                textViewYear.text = movie.year.toString()
+                textViewDescription.text = movie.description
+                loadLinks(movie.id)
+                getLinks().observe(this@MovieDetailActivity) { linksAdapter.setLinks(it) }
+                getReviews().observe(this@MovieDetailActivity) { reviewsAdapter.setReviews(it) }
+                loadReviews(movie.id)
 
-            val starOff = ContextCompat.getDrawable(
-                this@MovieDetailActivity,
-                android.R.drawable.star_big_off
-            )
-            val starOn = ContextCompat.getDrawable(
-                this@MovieDetailActivity,
-                android.R.drawable.star_big_on
-            )
+                val starOff = ContextCompat.getDrawable(
+                    this@MovieDetailActivity,
+                    android.R.drawable.star_big_off
+                )
+                val starOn = ContextCompat.getDrawable(
+                    this@MovieDetailActivity,
+                    android.R.drawable.star_big_on
+                )
 
-            viewModel.getFavouriteMovie(movie.id)
-                .observe(this@MovieDetailActivity) { movieFromDb ->
-                    val star: Drawable?
-                    if (movieFromDb == null) {
-                        star = starOff
-                        imageViewStar.setOnClickListener { viewModel.insertMovie(movie) }
-                    } else {
-                        star = starOn
-                        imageViewStar.setOnClickListener { viewModel.removeMovie(movie.id) }
+                getFavouriteMovie(movie.id)
+                    .observe(this@MovieDetailActivity) { movieFromDb ->
+                        val star: Drawable?
+                        if (movieFromDb == null) {
+                            star = starOff
+                            imageViewStar.setOnClickListener { insertMovie(movie) }
+                        } else {
+                            star = starOn
+                            imageViewStar.setOnClickListener { removeMovie(movie.id) }
+                        }
+                        imageViewStar.setImageDrawable(star)
                     }
-                    imageViewStar.setImageDrawable(star)
+                isError().observe(this@MovieDetailActivity) {
+                    Toast.makeText(this@MovieDetailActivity, it, Toast.LENGTH_LONG).show()
                 }
+            }
         }
     }
 
