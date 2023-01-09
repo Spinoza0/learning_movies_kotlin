@@ -2,7 +2,7 @@ package com.spinoza.movieskotlin.domain.reviews
 
 import com.google.gson.annotations.SerializedName
 
-class Review(
+data class Review(
     @SerializedName("title")
     val title: String?,
 

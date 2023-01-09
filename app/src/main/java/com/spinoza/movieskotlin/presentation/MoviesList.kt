@@ -26,7 +26,7 @@ class MoviesList(
 
         moviesModel
             .getMovies()
-            .observe(context as LifecycleOwner, moviesAdapter::setMovies)
+            .observe(context as LifecycleOwner, moviesAdapter::submitList)
         moviesModel
             .getIsLoading()
             .observe(context as LifecycleOwner) { isLoading ->

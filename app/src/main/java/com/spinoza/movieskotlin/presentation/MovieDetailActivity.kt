@@ -12,8 +12,8 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
 import com.bumptech.glide.Glide
-import com.spinoza.movieskotlin.data.MoviesApiFactory
 import com.spinoza.movieskotlin.data.MovieDatabase
+import com.spinoza.movieskotlin.data.MoviesApiFactory
 import com.spinoza.movieskotlin.databinding.ActivityMovieDetailBinding
 import com.spinoza.movieskotlin.domain.movies.Movie
 import com.spinoza.movieskotlin.presentation.adapter.LinksAdapter
@@ -67,8 +67,8 @@ class MovieDetailActivity : AppCompatActivity() {
                 textViewYear.text = movie.year.toString()
                 textViewDescription.text = movie.description
                 loadLinks(movie.id)
-                getLinks().observe(this@MovieDetailActivity) { linksAdapter.setLinks(it) }
-                getReviews().observe(this@MovieDetailActivity) { reviewsAdapter.setReviews(it) }
+                getLinks().observe(this@MovieDetailActivity) { linksAdapter.submitList(it) }
+                getReviews().observe(this@MovieDetailActivity) { reviewsAdapter.submitList(it) }
                 loadReviews(movie.id)
 
                 val starOff = ContextCompat.getDrawable(
@@ -80,18 +80,17 @@ class MovieDetailActivity : AppCompatActivity() {
                     android.R.drawable.star_big_on
                 )
 
-                getFavouriteMovie(movie.id)
-                    .observe(this@MovieDetailActivity) { movieFromDb ->
-                        val star: Drawable?
-                        if (movieFromDb == null) {
-                            star = starOff
-                            imageViewStar.setOnClickListener { insertMovie(movie) }
-                        } else {
-                            star = starOn
-                            imageViewStar.setOnClickListener { removeMovie(movie.id) }
-                        }
-                        imageViewStar.setImageDrawable(star)
+                getFavouriteMovie(movie.id).observe(this@MovieDetailActivity) { movieFromDb ->
+                    val star: Drawable?
+                    if (movieFromDb == null) {
+                        star = starOff
+                        imageViewStar.setOnClickListener { insertMovie(movie) }
+                    } else {
+                        star = starOn
+                        imageViewStar.setOnClickListener { removeMovie(movie.id) }
                     }
+                    imageViewStar.setImageDrawable(star)
+                }
                 isError().observe(this@MovieDetailActivity) {
                     Toast.makeText(this@MovieDetailActivity, it, Toast.LENGTH_LONG).show()
                 }
