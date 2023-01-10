@@ -67,8 +67,8 @@ class MovieDetailActivity : AppCompatActivity() {
                 textViewYear.text = movie.year.toString()
                 textViewDescription.text = movie.description
                 loadLinks(movie.id)
-                getLinks().observe(this@MovieDetailActivity) { linksAdapter.submitList(it) }
-                getReviews().observe(this@MovieDetailActivity) { reviewsAdapter.submitList(it) }
+                links.observe(this@MovieDetailActivity) { linksAdapter.submitList(it) }
+                reviews.observe(this@MovieDetailActivity) { reviewsAdapter.submitList(it) }
                 loadReviews(movie.id)
 
                 val starOff = ContextCompat.getDrawable(
@@ -91,7 +91,7 @@ class MovieDetailActivity : AppCompatActivity() {
                     }
                     imageViewStar.setImageDrawable(star)
                 }
-                isError().observe(this@MovieDetailActivity) {
+                error.observe(this@MovieDetailActivity) {
                     Toast.makeText(this@MovieDetailActivity, it, Toast.LENGTH_LONG).show()
                 }
             }

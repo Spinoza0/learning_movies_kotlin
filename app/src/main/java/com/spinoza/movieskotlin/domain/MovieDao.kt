@@ -10,7 +10,7 @@ import io.reactivex.rxjava3.core.Completable
 @Dao
 interface MovieDao {
     @Query("SELECT * FROM favourite_movies")
-    fun getAllFavouriteMovies(): LiveData<MutableList<Movie>>
+    fun getAllFavouriteMovies(): LiveData<List<Movie>>
 
     @Query("SELECT * FROM favourite_movies WHERE id=:movieId")
     fun getFavouriteMovie(movieId: Int): LiveData<Movie>

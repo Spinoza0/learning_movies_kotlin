@@ -38,7 +38,7 @@ class MoviesActivity : AppCompatActivity() {
             { viewModel.loadMovies() }
         )
 
-        viewModel.isError().observe(this) {
+        viewModel.error.observe(this) {
             Toast.makeText(this, it, Toast.LENGTH_LONG).show()
         }
     }

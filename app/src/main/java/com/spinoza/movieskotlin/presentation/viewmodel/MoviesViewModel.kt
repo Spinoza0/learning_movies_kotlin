@@ -13,17 +13,18 @@ import io.reactivex.rxjava3.schedulers.Schedulers
 
 class MoviesViewModel(private val apiService: MoviesApiService) : ViewModel(),
     MoviesListShowable {
-    private val movies = MutableLiveData<MutableList<Movie>>()
+    private val movies = MutableLiveData<List<Movie>>()
     private val isLoading = MutableLiveData(false)
-    private val error = MutableLiveData<String>()
     private val compositeDisposable = CompositeDisposable()
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String>
+        get() = _error
 
     private var page = 1
 
-    override fun getMovies(): LiveData<MutableList<Movie>> = movies
+    override fun getMovies(): LiveData<List<Movie>> = movies
     override fun getIsLoading(): LiveData<Boolean> = isLoading
-
-    fun isError(): LiveData<String> = error
 
     init {
         loadMovies()
@@ -31,7 +32,7 @@ class MoviesViewModel(private val apiService: MoviesApiService) : ViewModel(),
 
     override fun loadMovies() {
         val loading = isLoading.value
-        loading?.let {
+        loading?.let { it ->
             if (!it) {
                 val disposable: Disposable = apiService.loadMovies(page)
                     .subscribeOn(Schedulers.io())
@@ -39,12 +40,14 @@ class MoviesViewModel(private val apiService: MoviesApiService) : ViewModel(),
                     .observeOn(AndroidSchedulers.mainThread())
                     .doAfterTerminate { isLoading.setValue(false) }
                     .subscribe({ moviesResponse ->
-                        val loadedMovies =
-                            movies.value ?: moviesResponse.movies.toMutableList()
-                        movies.value?.let { loadedMovies.addAll(moviesResponse.movies) }
+                        val loadedMovies = mutableListOf<Movie>()
+                        movies.value?.let { movies ->
+                            loadedMovies.addAll(movies)
+                        }
+                        loadedMovies.addAll(moviesResponse.movies)
                         movies.value = loadedMovies
                         page++
-                    }) { throwable -> error.value = throwable.toString() }
+                    }) { throwable -> _error.value = throwable.toString() }
                 compositeDisposable.add(disposable)
             }
         }

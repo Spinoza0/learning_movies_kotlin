@@ -14,7 +14,7 @@ class FavouriteMoviesViewModel(private val movieDao: MovieDao) :
     private val compositeDisposable = CompositeDisposable()
     private val isLoading = MutableLiveData<Boolean>()
 
-    override fun getMovies(): LiveData<MutableList<Movie>> = movieDao.getAllFavouriteMovies()
+    override fun getMovies(): LiveData<List<Movie>> = movieDao.getAllFavouriteMovies()
     override fun getIsLoading(): LiveData<Boolean> = isLoading
     override fun loadMovies() {}
 

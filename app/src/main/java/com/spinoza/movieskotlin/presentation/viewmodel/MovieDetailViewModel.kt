@@ -20,21 +20,27 @@ class MovieDetailViewModel(
 ) : ViewModel() {
 
     private val compositeDisposable = CompositeDisposable()
-    private val links: MutableLiveData<List<Link>> = MutableLiveData<List<Link>>()
-    private val reviews: MutableLiveData<List<Review>> = MutableLiveData<List<Review>>()
-    private val error = MutableLiveData<String>()
+
+    private val _links = MutableLiveData<List<Link>>()
+    val links: LiveData<List<Link>>
+        get() = _links
+
+    private val _reviews = MutableLiveData<List<Review>>()
+    val reviews: LiveData<List<Review>>
+        get() = _reviews
+
+    private val _error = MutableLiveData<String>()
+    val error: LiveData<String>
+        get() = _error
 
     fun getFavouriteMovie(id: Int) = movieDao.getFavouriteMovie(id)
-    fun getReviews(): LiveData<List<Review>> = reviews
-    fun getLinks(): LiveData<List<Link>> = links
-    fun isError(): LiveData<String> = error
 
     fun loadLinks(id: Int) {
         val disposable: Disposable = apiService.loadLinks(id)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { linkResponse -> linkResponse.linkItemsList.items }
-            .subscribe(links::setValue) { throwable -> error.value = throwable.toString() }
+            .subscribe(_links::setValue) { throwable -> _error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
@@ -43,22 +49,22 @@ class MovieDetailViewModel(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map(ReviewsResponse::reviews)
-            .subscribe(reviews::setValue
-            ) { throwable -> error.value = throwable.toString() }
+            .subscribe(_reviews::setValue
+            ) { throwable -> _error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
     fun insertMovie(movie: Movie) {
         val disposable: Disposable = movieDao.insertMovie(movie)
             .subscribeOn(Schedulers.io())
-            .subscribe({}) { throwable -> error.value = throwable.toString() }
+            .subscribe({}) { throwable -> _error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
     fun removeMovie(movieId: Int) {
         val disposable: Disposable = movieDao.removeMovie(movieId)
             .subscribeOn(Schedulers.io())
-            .subscribe({}) { throwable -> error.value = throwable.toString() }
+            .subscribe({}) { throwable -> _error.value = throwable.toString() }
         compositeDisposable.add(disposable)
     }
 
