@@ -7,12 +7,12 @@ import com.spinoza.movieskotlin.domain.MovieDao
 
 class MovieDetailViewModelFactory(
     private val movieDao: MovieDao,
-    private val kinopoiskApiService: MoviesApiService,
+    private val apiService: MoviesApiService,
 ) :
     ViewModelProvider.Factory {
     override fun <T : ViewModel> create(modelClass: Class<T>): T {
         return modelClass
             .getConstructor(MovieDao::class.java, MoviesApiService::class.java)
-            .newInstance(movieDao, kinopoiskApiService)
+            .newInstance(movieDao, apiService)
     }
 }
