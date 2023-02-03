@@ -1,11 +1,14 @@
 package com.spinoza.movieskotlin.domain.movies
 
+import android.os.Parcelable
 import androidx.room.Embedded
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.google.gson.annotations.SerializedName
+import kotlinx.parcelize.Parcelize
 
 @Entity(tableName = "favourite_movies")
+@Parcelize
 data class Movie(
     @PrimaryKey
     @SerializedName("id")
@@ -27,4 +30,4 @@ data class Movie(
     @SerializedName("rating")
     @Embedded
     val rating: Rating,
-) : java.io.Serializable
+) : Parcelable

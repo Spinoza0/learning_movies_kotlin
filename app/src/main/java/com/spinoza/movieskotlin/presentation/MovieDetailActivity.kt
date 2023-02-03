@@ -7,7 +7,6 @@ import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.widget.Toast
-import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.ViewModelProvider
@@ -27,7 +26,6 @@ class MovieDetailActivity : AppCompatActivity() {
     private lateinit var linksAdapter: LinksAdapter
     private lateinit var reviewsAdapter: ReviewsAdapter
 
-    @RequiresApi(Build.VERSION_CODES.TIRAMISU)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMovieDetailBinding.inflate(layoutInflater)
@@ -51,7 +49,12 @@ class MovieDetailActivity : AppCompatActivity() {
         binding.recyclerViewLinks.adapter = linksAdapter
         binding.recyclerViewReviews.adapter = reviewsAdapter
         if (intent.hasExtra(EXTRA_MOVIE)) {
-            intent.getSerializableExtra(EXTRA_MOVIE, Movie::class.java)?.let { setContent(it) }
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                intent.getParcelableExtra(EXTRA_MOVIE, Movie::class.java)?.let { setContent(it) }
+            } else {
+                @Suppress("deprecation")
+                setContent(intent.getParcelableExtra<Movie>(EXTRA_MOVIE) as Movie)
+            }
         } else {
             finish()
         }
@@ -102,9 +105,9 @@ class MovieDetailActivity : AppCompatActivity() {
         private const val EXTRA_MOVIE = "movie"
 
         fun newIntent(context: Context, movie: Movie): Intent {
-            val intent = Intent(context, MovieDetailActivity::class.java)
-            intent.putExtra(EXTRA_MOVIE, movie)
-            return intent
+            return Intent(context, MovieDetailActivity::class.java).apply {
+                putExtra(EXTRA_MOVIE, movie)
+            }
         }
     }
 }
