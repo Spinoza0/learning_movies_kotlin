@@ -3,8 +3,8 @@ package com.spinoza.movieskotlin.presentation.viewmodel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.spinoza.movieskotlin.domain.MoviesApiService
 import com.spinoza.movieskotlin.domain.MovieDao
+import com.spinoza.movieskotlin.domain.MoviesApiService
 import com.spinoza.movieskotlin.domain.links.Link
 import com.spinoza.movieskotlin.domain.movies.Movie
 import com.spinoza.movieskotlin.domain.reviews.Review
@@ -40,7 +40,7 @@ class MovieDetailViewModel(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map { linkResponse -> linkResponse.linkItemsList.items }
-            .subscribe(_links::setValue) { throwable -> _error.value = throwable.toString() }
+            .subscribe(_links::setValue) { }
         compositeDisposable.add(disposable)
     }
 
@@ -49,8 +49,9 @@ class MovieDetailViewModel(
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .map(ReviewsResponse::reviews)
-            .subscribe(_reviews::setValue
-            ) { throwable -> _error.value = throwable.toString() }
+            .subscribe(
+                _reviews::setValue
+            ) { }
         compositeDisposable.add(disposable)
     }
 
