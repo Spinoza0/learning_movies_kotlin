@@ -1,13 +1,12 @@
-package com.spinoza.movieskotlin.data
+package com.spinoza.movieskotlin.data.database
 
 import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import com.spinoza.movieskotlin.domain.MovieDao
-import com.spinoza.movieskotlin.domain.movies.Movie
+import com.spinoza.movieskotlin.data.database.model.MovieDbModel
 
-@Database(entities = [Movie::class], version = 1, exportSchema = false)
+@Database(entities = [MovieDbModel::class], version = 1, exportSchema = false)
 abstract class MovieDatabase : RoomDatabase() {
     companion object {
         private const val DATABASE_NAME = "movies.db"

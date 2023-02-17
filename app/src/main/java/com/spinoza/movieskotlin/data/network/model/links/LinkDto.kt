@@ -1,8 +1,8 @@
-package com.spinoza.movieskotlin.domain.links
+package com.spinoza.movieskotlin.data.network.model.links
 
 import com.google.gson.annotations.SerializedName
 
-data class Link(
+data class LinkDto(
     @SerializedName("name") val name: String,
     @SerializedName("url") val url: String,
 )

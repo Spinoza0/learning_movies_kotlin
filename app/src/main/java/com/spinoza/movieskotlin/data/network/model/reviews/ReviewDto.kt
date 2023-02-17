@@ -1,10 +1,10 @@
-package com.spinoza.movieskotlin.domain.reviews
+package com.spinoza.movieskotlin.data.network.model.reviews
 
 import com.google.gson.annotations.SerializedName
 
-data class Review(
+data class ReviewDto(
     @SerializedName("title")
-    val title: String?,
+    val title: String,
 
     @SerializedName("type")
     val type: String,
