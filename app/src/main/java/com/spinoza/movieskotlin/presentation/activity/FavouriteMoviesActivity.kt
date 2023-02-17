@@ -45,7 +45,7 @@ class FavouriteMoviesActivity : AppCompatActivity() {
                 is MoviesState.Loading -> {
                     binding.progressBar.visibility = View.VISIBLE
                 }
-                is MoviesState.Movies -> {
+                is MoviesState.FavouriteMovies -> {
                     moviesAdapter.submitList(it.items)
                 }
                 else -> {}
@@ -54,7 +54,6 @@ class FavouriteMoviesActivity : AppCompatActivity() {
     }
 
     private fun setupRecyclerView(binding: ActivityFavouriteMoviesBinding) {
-        val moviesAdapter = MoviesAdapter()
         binding.recyclerViewMovies.adapter = moviesAdapter
         binding.recyclerViewMovies.layoutManager = GridLayoutManager(this, 2)
         moviesAdapter.onMovieClickListener = {

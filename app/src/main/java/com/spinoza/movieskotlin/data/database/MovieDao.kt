@@ -2,6 +2,7 @@ package com.spinoza.movieskotlin.data.database
 
 import androidx.room.Dao
 import androidx.room.Insert
+import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import com.spinoza.movieskotlin.data.database.model.MovieDbModel
 import com.spinoza.movieskotlin.data.database.model.MovieDbModel.Companion.TABLE_FAVOURITES
@@ -11,7 +12,7 @@ interface MovieDao {
     @Query("SELECT * FROM $TABLE_FAVOURITES")
     suspend fun getAllFavouriteMovies(): List<MovieDbModel>
 
-    @Insert
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertMovie(movie: MovieDbModel)
 
     @Query("DELETE FROM $TABLE_FAVOURITES WHERE id=:movieId")

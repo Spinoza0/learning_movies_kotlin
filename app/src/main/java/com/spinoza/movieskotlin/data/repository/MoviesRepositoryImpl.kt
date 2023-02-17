@@ -41,7 +41,7 @@ class MoviesRepositoryImpl(
 
     override suspend fun getAllFavouriteMovies() {
         runCatching {
-            state.value = MoviesState.Movies(
+            state.value = MoviesState.FavouriteMovies(
                 moviesMapper.mapDbModelToEntity(movieDao.getAllFavouriteMovies())
             )
         }.onFailure {

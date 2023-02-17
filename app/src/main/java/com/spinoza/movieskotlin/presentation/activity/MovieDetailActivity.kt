@@ -57,7 +57,7 @@ class MovieDetailActivity : AppCompatActivity() {
             return value
         }
 
-        throw RuntimeException("Parameter FILM not found in bundle")
+        throw RuntimeException("Parameter MOVIE not found in bundle")
     }
 
     private fun setupRecyclerView() {
