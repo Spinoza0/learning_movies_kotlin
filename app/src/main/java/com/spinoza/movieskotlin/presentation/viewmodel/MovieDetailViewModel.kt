@@ -12,11 +12,9 @@ class MovieDetailViewModel(
 
     val state = moviesRepository.getState()
 
-    fun loadMovieDetails(id: Int) {
+    fun loadMovieDetails(movie: Movie) {
         viewModelScope.launch {
-            moviesRepository.getOneFavouriteMovie(id)
-            moviesRepository.loadLinks(id)
-            moviesRepository.loadReviews(id)
+            moviesRepository.loadOneMovie(movie)
         }
     }
 

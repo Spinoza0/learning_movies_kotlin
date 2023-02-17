@@ -20,6 +20,6 @@ interface MovieDao {
     @Query("DELETE FROM $TABLE_FAVOURITES WHERE id=:movieId")
     fun removeMovie(movieId: Int)
 
-    @Query("SELECT EXISTS (SELECT * FROM $TABLE_FAVOURITES WHERE movieId=:movieId)")
+    @Query("SELECT EXISTS (SELECT * FROM $TABLE_FAVOURITES WHERE id=:movieId)")
     suspend fun isMovieFavourite(movieId: Int): Boolean
 }

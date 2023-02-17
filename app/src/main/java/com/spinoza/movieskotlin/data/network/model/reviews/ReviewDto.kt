@@ -4,7 +4,7 @@ import com.google.gson.annotations.SerializedName
 
 data class ReviewDto(
     @SerializedName("title")
-    val title: String,
+    val title: String?,
 
     @SerializedName("type")
     val type: String,

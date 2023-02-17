@@ -1,5 +1,9 @@
 package com.spinoza.movieskotlin.domain.model
 
+import android.os.Parcelable
+import kotlinx.parcelize.Parcelize
+
+@Parcelize
 data class Movie(
     val id: Int,
     val year: Int,
@@ -7,5 +11,4 @@ data class Movie(
     val description: String,
     val poster: String,
     val rating: Double,
-    var isFavourite: Boolean,
-)
+) : Parcelable

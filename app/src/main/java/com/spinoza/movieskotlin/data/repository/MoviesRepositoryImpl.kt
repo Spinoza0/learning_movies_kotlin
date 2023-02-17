@@ -6,6 +6,7 @@ import com.spinoza.movieskotlin.data.database.MovieDao
 import com.spinoza.movieskotlin.data.mapper.MoviesMapper
 import com.spinoza.movieskotlin.data.network.MoviesApiService
 import com.spinoza.movieskotlin.domain.model.Movie
+import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
 import com.spinoza.movieskotlin.domain.repository.MoviesRepository
 import retrofit2.Response
@@ -29,7 +30,7 @@ class MoviesRepositoryImpl(
             if (response.isSuccessful) {
                 page++
                 response.body()?.let {
-                    movies.addAll(moviesMapper.mapDtoToEntity(it.movies))
+                    movies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
                 }
                 state.value = MoviesState.Movies(movies.toList())
             } else {
@@ -38,27 +39,9 @@ class MoviesRepositoryImpl(
         }
     }
 
-    override suspend fun loadLinks(movieId: Int) {
-        val response = moviesApiService.loadLinks(movieId)
-        if (response.isSuccessful) {
-            response.body()?.let {
-                state.value = MoviesState.Links(moviesMapper.mapDtoToEntity(it.linkItemsList.items))
-            }
-        }
-    }
-
-    override suspend fun loadReviews(movieId: Int) {
-        val response = moviesApiService.loadReviews(movieId)
-        if (response.isSuccessful) {
-            response.body()?.let {
-                state.value = MoviesState.Reviews(moviesMapper.mapDtoToEntity(it.reviews))
-            }
-        }
-    }
-
     override suspend fun getAllFavouriteMovies() {
         runCatching {
-            state.value = MoviesState.AllFavouriteMovies(
+            state.value = MoviesState.Movies(
                 moviesMapper.mapDbModelToEntity(movieDao.getAllFavouriteMovies())
             )
         }.onFailure {
@@ -66,25 +49,59 @@ class MoviesRepositoryImpl(
         }
     }
 
-    override suspend fun getOneFavouriteMovie(movieId: Int) {
-        runCatching {
-            state.value = MoviesState.OneFavouriteMovie(
-                moviesMapper.mapDbModelToEntity(movieDao.getFavouriteMovie(movieId))
+    override suspend fun loadOneMovie(movie: Movie) {
+        val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
+        if (oneMovieResponse.isSuccessful) {
+            var newMovie = movie
+            oneMovieResponse.body()?.let {
+                newMovie = moviesMapper.mapDtoToEntity(it)
+            }
+
+            val links = moviesMapper.mapLinksDtoToEntity(
+                oneMovieResponse.body()?.linkItemsList?.items ?: listOf()
             )
-        }.onFailure {
-            state.value = getError(it)
+
+            val reviewsResponse = moviesApiService.loadReviews(movie.id)
+            val reviews = if (reviewsResponse.isSuccessful) {
+                moviesMapper.mapReviewsDtoToEntity(reviewsResponse.body()?.reviews ?: listOf())
+            } else {
+                listOf()
+            }
+
+            state.value = MoviesState.OneMovieDetails(
+                MovieDetails(
+                    newMovie,
+                    isMovieFavourite(newMovie.id),
+                    links,
+                    reviews
+                )
+            )
+        } else {
+            state.value = MoviesState.OneMovieDetails(
+                MovieDetails(
+                    movie,
+                    isMovieFavourite(movie.id),
+                    listOf(),
+                    listOf()
+                )
+            )
         }
     }
 
+    private suspend fun isMovieFavourite(movieId: Int): Boolean = try {
+        movieDao.isMovieFavourite(movieId)
+    } catch (e: Exception) {
+        false
+    }
+
     override suspend fun changeFavouriteStatus(movie: Movie) {
-        val newMovie = movie.copy(isFavourite = !movie.isFavourite)
         runCatching {
-            if (newMovie.isFavourite) {
-                movieDao.insertMovie(moviesMapper.mapEntityToDbModel(newMovie))
-                state.value = MoviesState.FavouriteStatus(true)
-            } else {
-                movieDao.removeMovie(newMovie.id)
+            if (movieDao.isMovieFavourite(movie.id)) {
+                movieDao.removeMovie(movie.id)
                 state.value = MoviesState.FavouriteStatus(false)
+            } else {
+                movieDao.insertMovie(moviesMapper.mapEntityToDbModel(movie))
+                state.value = MoviesState.FavouriteStatus(true)
             }
         }.onFailure {
             state.value = getError(it)
