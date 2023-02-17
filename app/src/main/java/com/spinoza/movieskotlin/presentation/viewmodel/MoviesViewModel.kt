@@ -2,13 +2,18 @@ package com.spinoza.movieskotlin.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-
-import com.spinoza.movieskotlin.domain.repository.MoviesRepository
+import com.spinoza.movieskotlin.domain.usecase.GetMoviesFromCacheUseCase
+import com.spinoza.movieskotlin.domain.usecase.GetStateUseCase
+import com.spinoza.movieskotlin.domain.usecase.LoadMoviesUseCase
 import kotlinx.coroutines.launch
 
-class MoviesViewModel(private val moviesRepository: MoviesRepository) : ViewModel() {
+class MoviesViewModel(
+    getStateUseCase: GetStateUseCase,
+    private val loadMoviesUseCase: LoadMoviesUseCase,
+    private val getMoviesFromCacheUseCase: GetMoviesFromCacheUseCase,
+) : ViewModel() {
 
-    val state = moviesRepository.getState()
+    val state = getStateUseCase()
 
     init {
         loadMovies()
@@ -16,13 +21,13 @@ class MoviesViewModel(private val moviesRepository: MoviesRepository) : ViewMode
 
     fun loadMovies() {
         viewModelScope.launch {
-            moviesRepository.loadMovies()
+            loadMoviesUseCase()
         }
     }
 
     fun onResume() {
         viewModelScope.launch {
-            moviesRepository.getMoviesFromCache()
+            getMoviesFromCacheUseCase()
         }
     }
 }

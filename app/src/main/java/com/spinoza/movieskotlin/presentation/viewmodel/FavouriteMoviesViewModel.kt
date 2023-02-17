@@ -2,12 +2,16 @@ package com.spinoza.movieskotlin.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.spinoza.movieskotlin.domain.repository.MoviesRepository
+import com.spinoza.movieskotlin.domain.usecase.GetAllFavouritesMoviesUseCase
+import com.spinoza.movieskotlin.domain.usecase.GetStateUseCase
 import kotlinx.coroutines.launch
 
-class FavouriteMoviesViewModel(private val moviesRepository: MoviesRepository) : ViewModel() {
+class FavouriteMoviesViewModel(
+    getStateUseCase: GetStateUseCase,
+    private val getAllFavouritesMoviesUseCase: GetAllFavouritesMoviesUseCase,
+) : ViewModel() {
 
-    val state = moviesRepository.getState()
+    val state = getStateUseCase()
 
     init {
         loadMovies()
@@ -15,7 +19,7 @@ class FavouriteMoviesViewModel(private val moviesRepository: MoviesRepository) :
 
     fun loadMovies() {
         viewModelScope.launch {
-            moviesRepository.getAllFavouriteMovies()
+            getAllFavouritesMoviesUseCase()
         }
     }
 }

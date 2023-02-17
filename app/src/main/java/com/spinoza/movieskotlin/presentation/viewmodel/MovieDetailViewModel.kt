@@ -3,24 +3,28 @@ package com.spinoza.movieskotlin.presentation.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.spinoza.movieskotlin.domain.model.Movie
-import com.spinoza.movieskotlin.domain.repository.MoviesRepository
+import com.spinoza.movieskotlin.domain.usecase.ChangeFavouriteStatusUseCase
+import com.spinoza.movieskotlin.domain.usecase.GetStateUseCase
+import com.spinoza.movieskotlin.domain.usecase.LoadOneMovieUseCase
 import kotlinx.coroutines.launch
 
 class MovieDetailViewModel(
-    private val moviesRepository: MoviesRepository,
+    getStateUseCase: GetStateUseCase,
+    private val loadOneMovieUseCase: LoadOneMovieUseCase,
+    private val changeFavouriteStatusUseCase: ChangeFavouriteStatusUseCase,
 ) : ViewModel() {
 
-    val state = moviesRepository.getState()
+    val state = getStateUseCase()
 
     fun loadMovieDetails(movie: Movie) {
         viewModelScope.launch {
-            moviesRepository.loadOneMovie(movie)
+            loadOneMovieUseCase(movie)
         }
     }
 
     fun changeFavouriteStatus(movie: Movie) {
         viewModelScope.launch {
-            moviesRepository.changeFavouriteStatus(movie)
+            changeFavouriteStatusUseCase(movie)
         }
     }
 }

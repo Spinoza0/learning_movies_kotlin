@@ -9,14 +9,25 @@ import org.koin.dsl.module
 val presentationModule = module {
 
     viewModel<MoviesViewModel> {
-        MoviesViewModel(moviesRepository = get())
+        MoviesViewModel(
+            getStateUseCase = get(),
+            loadMoviesUseCase = get(),
+            getMoviesFromCacheUseCase = get()
+        )
     }
 
     viewModel<FavouriteMoviesViewModel> {
-        FavouriteMoviesViewModel(moviesRepository = get())
+        FavouriteMoviesViewModel(
+            getStateUseCase = get(),
+            getAllFavouritesMoviesUseCase = get()
+        )
     }
 
     viewModel<MovieDetailViewModel> {
-        MovieDetailViewModel(moviesRepository = get())
+        MovieDetailViewModel(
+            getStateUseCase = get(),
+            loadOneMovieUseCase = get(),
+            changeFavouriteStatusUseCase = get()
+        )
     }
 }
