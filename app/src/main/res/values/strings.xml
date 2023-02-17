@@ -5,4 +5,6 @@
     <string name="item_favourite">Избранное</string>
     <string name="play">Play</string>
     <string name="star">Star</string>
+    <string name="movies">Фильмы</string>
+    <string name="favourites">Избранное</string>
 </resources>
