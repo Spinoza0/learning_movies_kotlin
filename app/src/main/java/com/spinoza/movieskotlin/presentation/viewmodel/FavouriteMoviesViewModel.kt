@@ -1,25 +1,21 @@
 package com.spinoza.movieskotlin.presentation.viewmodel
 
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
-import com.spinoza.movieskotlin.domain.MovieDao
-import com.spinoza.movieskotlin.domain.movies.Movie
-import com.spinoza.movieskotlin.presentation.MoviesListShowable
-import io.reactivex.rxjava3.disposables.CompositeDisposable
+import androidx.lifecycle.viewModelScope
+import com.spinoza.movieskotlin.domain.repository.MoviesRepository
+import kotlinx.coroutines.launch
 
-class FavouriteMoviesViewModel(private val movieDao: MovieDao) :
-    ViewModel(),
-    MoviesListShowable {
-    private val compositeDisposable = CompositeDisposable()
-    private val isLoading = MutableLiveData<Boolean>()
+class FavouriteMoviesViewModel(private val moviesRepository: MoviesRepository) : ViewModel() {
 
-    override fun getMovies(): LiveData<List<Movie>> = movieDao.getAllFavouriteMovies()
-    override fun getIsLoading(): LiveData<Boolean> = isLoading
-    override fun loadMovies() {}
+    val state = moviesRepository.getState()
 
-    override fun onCleared() {
-        super.onCleared()
-        compositeDisposable.dispose()
+    init {
+        loadMovies()
+    }
+
+    private fun loadMovies() {
+        viewModelScope.launch {
+            moviesRepository.getAllFavouriteMovies()
+        }
     }
 }
