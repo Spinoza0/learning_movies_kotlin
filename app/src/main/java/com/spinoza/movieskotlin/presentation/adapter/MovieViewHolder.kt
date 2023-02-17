@@ -1,12 +1,6 @@
 package com.spinoza.movieskotlin.presentation.adapter
 
-import android.view.View
-import android.widget.ImageView
-import android.widget.TextView
 import androidx.recyclerview.widget.RecyclerView
-import com.spinoza.movieskotlin.R
+import com.spinoza.movieskotlin.databinding.MovieItemBinding
 
-class MovieViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
-    val imageViewPoster: ImageView = itemView.findViewById(R.id.imageViewPoster)
-    val textViewRating: TextView = itemView.findViewById(R.id.textViewRating)
-}
+class MovieViewHolder(val binding: MovieItemBinding) : RecyclerView.ViewHolder(binding.root)

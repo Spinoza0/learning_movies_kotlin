@@ -1,7 +1,7 @@
 package com.spinoza.movieskotlin.presentation.adapter
 
 import androidx.recyclerview.widget.DiffUtil
-import com.spinoza.movieskotlin.domain.movies.Movie
+import com.spinoza.movieskotlin.domain.model.Movie
 
 class MoviesDiffCallback : DiffUtil.ItemCallback<Movie>() {
     override fun areItemsTheSame(oldItem: Movie, newItem: Movie): Boolean {
