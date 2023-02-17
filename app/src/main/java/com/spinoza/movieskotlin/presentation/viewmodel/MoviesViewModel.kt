@@ -19,4 +19,10 @@ class MoviesViewModel(private val moviesRepository: MoviesRepository) : ViewMode
             moviesRepository.loadMovies()
         }
     }
+
+    fun onResume() {
+        viewModelScope.launch {
+            moviesRepository.getMoviesFromCache()
+        }
+    }
 }

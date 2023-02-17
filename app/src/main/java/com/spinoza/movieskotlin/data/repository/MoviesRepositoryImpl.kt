@@ -39,6 +39,10 @@ class MoviesRepositoryImpl(
         }
     }
 
+    override suspend fun getMoviesFromCache() {
+        state.value = MoviesState.Movies(movies.toList())
+    }
+
     override suspend fun getAllFavouriteMovies() {
         runCatching {
             state.value = MoviesState.FavouriteMovies(

@@ -13,7 +13,7 @@ class FavouriteMoviesViewModel(private val moviesRepository: MoviesRepository) :
         loadMovies()
     }
 
-    private fun loadMovies() {
+    fun loadMovies() {
         viewModelScope.launch {
             moviesRepository.getAllFavouriteMovies()
         }
