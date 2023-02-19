@@ -7,6 +7,9 @@ import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
+import androidx.recyclerview.widget.RecyclerView
+import androidx.recyclerview.widget.RecyclerView.OnScrollListener
+import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
 import com.spinoza.movieskotlin.R
 import com.spinoza.movieskotlin.databinding.ActivityMoviesBinding
 import com.spinoza.movieskotlin.domain.model.MovieDetails
@@ -57,6 +60,13 @@ class MoviesActivity : AppCompatActivity() {
     private fun setupRecyclerView(binding: ActivityMoviesBinding) {
         binding.recyclerViewMovies.adapter = moviesAdapter
         binding.recyclerViewMovies.layoutManager = GridLayoutManager(this, 2)
+        binding.recyclerViewMovies.addOnScrollListener(object : OnScrollListener() {
+            override fun onScrollStateChanged(recyclerView: RecyclerView, newState: Int) {
+                super.onScrollStateChanged(recyclerView, newState)
+                if (newState == SCROLL_STATE_DRAGGING && moviesAdapter.itemCount == EMPTY_LIST)
+                    viewModel.loadMovies()
+            }
+        })
         moviesAdapter.onMovieClickListener = { viewModel.loadOneMovie(it) }
         moviesAdapter.onReachEndListener = { viewModel.loadMovies() }
     }
@@ -85,5 +95,9 @@ class MoviesActivity : AppCompatActivity() {
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
         viewModel.resetState()
+    }
+
+    companion object {
+        private const val EMPTY_LIST = 0
     }
 }
