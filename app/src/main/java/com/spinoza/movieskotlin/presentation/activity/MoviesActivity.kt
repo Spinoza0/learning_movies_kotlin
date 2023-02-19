@@ -1,8 +1,6 @@
 package com.spinoza.movieskotlin.presentation.activity
 
 import android.os.Bundle
-import android.view.Menu
-import android.view.MenuItem
 import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -10,7 +8,6 @@ import androidx.recyclerview.widget.GridLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import androidx.recyclerview.widget.RecyclerView.OnScrollListener
 import androidx.recyclerview.widget.RecyclerView.SCROLL_STATE_DRAGGING
-import com.spinoza.movieskotlin.R
 import com.spinoza.movieskotlin.databinding.ActivityMoviesBinding
 import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
@@ -34,7 +31,14 @@ class MoviesActivity : AppCompatActivity() {
         setContentView(binding.root)
 
         setupRecyclerView(binding)
+        setupListeners()
         setupObservers()
+    }
+
+    private fun setupListeners() {
+        binding.imageViewStar.setOnClickListener {
+            startActivity(FavouriteMoviesActivity.newIntent(this))
+        }
     }
 
     private fun setupObservers() {
@@ -77,19 +81,6 @@ class MoviesActivity : AppCompatActivity() {
             movieDetails
         )
         startActivity(intent)
-    }
-
-    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
-        menuInflater.inflate(R.menu.main_menu, menu)
-        return super.onCreateOptionsMenu(menu)
-    }
-
-    override fun onOptionsItemSelected(item: MenuItem): Boolean {
-        if (item.itemId == R.id.itemFavourite) {
-            val intent = FavouriteMoviesActivity.newIntent(this)
-            startActivity(intent)
-        }
-        return super.onOptionsItemSelected(item)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {

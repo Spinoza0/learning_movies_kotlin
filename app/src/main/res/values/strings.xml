@@ -1,10 +1,9 @@
 <resources>
-    <string name="app_name">Movies</string>
+    <string name="app_name">Информация о фильмах</string>
     <string name="poster_image">Poster image</string>
     <string name="image_poster">Image poster</string>
-    <string name="item_favourite">Избранное</string>
     <string name="play">Play</string>
     <string name="star">Star</string>
-    <string name="movies">Фильмы</string>
+    <string name="movies">Фильмы (полный список)</string>
     <string name="favourites">Избранное</string>
 </resources>
