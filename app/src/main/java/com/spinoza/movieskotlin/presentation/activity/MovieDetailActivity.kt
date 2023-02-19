@@ -10,7 +10,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.bumptech.glide.Glide
 import com.spinoza.movieskotlin.databinding.ActivityMovieDetailBinding
-import com.spinoza.movieskotlin.domain.model.Movie
+import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
 import com.spinoza.movieskotlin.presentation.adapter.LinksAdapter
 import com.spinoza.movieskotlin.presentation.adapter.ReviewsAdapter
@@ -45,19 +45,19 @@ class MovieDetailActivity : AppCompatActivity() {
         }
     }
 
-    private fun parseParam(): Movie {
+    private fun parseParam(): MovieDetails {
 
-        val movie = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
-            intent.getParcelableExtra(EXTRA_MOVIE, Movie::class.java)
+        val movieDetails = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(EXTRA_MOVIE, MovieDetails::class.java)
         } else {
             @Suppress("deprecation")
-            intent.getParcelableExtra<Movie>(EXTRA_MOVIE) as Movie
+            intent.getParcelableExtra<MovieDetails>(EXTRA_MOVIE) as MovieDetails
         }
-        movie?.let { value ->
+        movieDetails?.let { value ->
             return value
         }
 
-        throw RuntimeException("Parameter MOVIE not found in bundle")
+        throw RuntimeException("Parameter MovieDetails not found in bundle")
     }
 
     private fun setupRecyclerView() {
@@ -69,41 +69,41 @@ class MovieDetailActivity : AppCompatActivity() {
         binding.recyclerViewReviews.adapter = reviewsAdapter
     }
 
-    private fun setContent(movie: Movie) {
+    private fun setContent(movieDetails: MovieDetails) {
+        with(binding) {
+            Glide.with(this@MovieDetailActivity)
+                .load(movieDetails.movie.poster)
+                .into(imageViewPoster)
+            textViewName.text = movieDetails.movie.name
+            textViewYear.text = movieDetails.movie.year.toString()
+            textViewDescription.text = movieDetails.movie.description
+            setupImageViewStar(movieDetails.isFavourite)
+            linksAdapter.submitList(movieDetails.links)
+            reviewsAdapter.submitList(movieDetails.reviews)
+        }
+
         setupObservers()
-        setupListeners(movie)
-        viewModel.loadMovieDetails(movie)
+        setupListeners(movieDetails)
     }
 
-    private fun setupListeners(movie: Movie) {
-        binding.imageViewStar.setOnClickListener { viewModel.changeFavouriteStatus(movie) }
+    private fun setupListeners(movieDetails: MovieDetails) {
+        binding.imageViewStar.setOnClickListener {
+            viewModel.changeFavouriteStatus(movieDetails.movie)
+        }
     }
 
     private fun setupObservers() {
-        with(binding) {
-            viewModel.state.observe(this@MovieDetailActivity) {
-                when (it) {
-                    is MoviesState.Error -> {
-                        Toast.makeText(
-                            this@MovieDetailActivity,
-                            it.value,
-                            Toast.LENGTH_LONG
-                        ).show()
-                    }
-                    is MoviesState.OneMovieDetails -> {
-                        Glide.with(this@MovieDetailActivity)
-                            .load(it.value.movie.poster)
-                            .into(imageViewPoster)
-                        textViewName.text = it.value.movie.name
-                        textViewYear.text = it.value.movie.year.toString()
-                        textViewDescription.text = it.value.movie.description
-                        setupImageViewStar(it.value.isFavourite)
-                        linksAdapter.submitList(it.value.links)
-                        reviewsAdapter.submitList(it.value.reviews)
-                    }
-                    is MoviesState.FavouriteStatus -> setupImageViewStar(it.value)
-                    else -> {}
+        viewModel.state.observe(this@MovieDetailActivity) {
+            when (it) {
+                is MoviesState.Error -> {
+                    Toast.makeText(
+                        this@MovieDetailActivity,
+                        it.value,
+                        Toast.LENGTH_LONG
+                    ).show()
                 }
+                is MoviesState.FavouriteStatus -> setupImageViewStar(it.value)
+                else -> {}
             }
         }
     }
@@ -116,9 +116,9 @@ class MovieDetailActivity : AppCompatActivity() {
     companion object {
         private const val EXTRA_MOVIE = "movie"
 
-        fun newIntent(context: Context, movie: Movie): Intent {
+        fun newIntent(context: Context, movieDetails: MovieDetails): Intent {
             return Intent(context, MovieDetailActivity::class.java).apply {
-                putExtra(EXTRA_MOVIE, movie)
+                putExtra(EXTRA_MOVIE, movieDetails)
             }
         }
     }

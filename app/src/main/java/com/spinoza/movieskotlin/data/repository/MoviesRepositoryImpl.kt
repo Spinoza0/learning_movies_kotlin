@@ -8,6 +8,7 @@ import com.spinoza.movieskotlin.data.network.MoviesApiService
 import com.spinoza.movieskotlin.domain.model.Movie
 import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
+import com.spinoza.movieskotlin.domain.model.ScreenType
 import com.spinoza.movieskotlin.domain.repository.MoviesRepository
 import retrofit2.Response
 
@@ -18,42 +19,56 @@ class MoviesRepositoryImpl(
 ) : MoviesRepository {
 
     private var page = FIRST_PAGE
-    private val movies = mutableListOf<Movie>()
+    private val allMovies = mutableListOf<Movie>()
 
-    private val state = MutableLiveData<MoviesState>()
-    override fun getState(): LiveData<MoviesState> = state
+    private val stateAllMovies = MutableLiveData<MoviesState>()
+    private val stateFavouriteMovies = MutableLiveData<MoviesState>()
+    private val stateMovieDetails = MutableLiveData<MoviesState>()
 
-    override suspend fun loadMovies() {
-        if (state.value != MoviesState.Loading) {
-            state.value = MoviesState.Loading
+    override fun getState(screenType: ScreenType): LiveData<MoviesState> = when (screenType) {
+        ScreenType.ALL_MOVIES -> stateAllMovies
+        ScreenType.FAVOURITE_MOVIES -> stateFavouriteMovies
+        ScreenType.MOVIE_DETAILS -> stateMovieDetails
+    }
+
+    override fun resetState(screenType: ScreenType) = when (screenType) {
+        ScreenType.ALL_MOVIES -> stateAllMovies.value = MoviesState.Empty
+        ScreenType.FAVOURITE_MOVIES -> stateFavouriteMovies.value = MoviesState.Empty
+        ScreenType.MOVIE_DETAILS -> stateMovieDetails.value = MoviesState.Empty
+    }
+
+    override suspend fun loadAllMovies() {
+        if (stateAllMovies.value != MoviesState.Loading) {
+            stateAllMovies.value = MoviesState.Loading
             val response = moviesApiService.loadMovies(page)
             if (response.isSuccessful) {
                 page++
                 response.body()?.let {
-                    movies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
+                    allMovies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
                 }
-                state.value = MoviesState.Movies(movies.toList())
+                stateAllMovies.value = MoviesState.Movies(allMovies.toList())
             } else {
-                state.value = getError(response)
+                stateAllMovies.value = getError(response)
             }
         }
     }
 
     override suspend fun getMoviesFromCache() {
-        state.value = MoviesState.Movies(movies.toList())
+        stateAllMovies.value = MoviesState.Movies(allMovies.toList())
     }
 
     override suspend fun getAllFavouriteMovies() {
         runCatching {
-            state.value = MoviesState.FavouriteMovies(
+            stateFavouriteMovies.value = MoviesState.FavouriteMovies(
                 moviesMapper.mapDbModelToEntity(movieDao.getAllFavouriteMovies())
             )
         }.onFailure {
-            state.value = getError(it)
+            stateFavouriteMovies.value = getError(it)
         }
     }
 
-    override suspend fun loadOneMovie(movie: Movie) {
+    override suspend fun loadMovieDetails(movie: Movie, screenType: ScreenType) {
+        val oneMovieDetails: MoviesState.OneMovieDetails
         val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
         if (oneMovieResponse.isSuccessful) {
             var newMovie = movie
@@ -72,7 +87,7 @@ class MoviesRepositoryImpl(
                 listOf()
             }
 
-            state.value = MoviesState.OneMovieDetails(
+            oneMovieDetails = MoviesState.OneMovieDetails(
                 MovieDetails(
                     newMovie,
                     isMovieFavourite(newMovie.id),
@@ -81,7 +96,7 @@ class MoviesRepositoryImpl(
                 )
             )
         } else {
-            state.value = MoviesState.OneMovieDetails(
+            oneMovieDetails = MoviesState.OneMovieDetails(
                 MovieDetails(
                     movie,
                     isMovieFavourite(movie.id),
@@ -89,6 +104,12 @@ class MoviesRepositoryImpl(
                     listOf()
                 )
             )
+        }
+
+        when (screenType) {
+            ScreenType.ALL_MOVIES -> stateAllMovies.value = oneMovieDetails
+            ScreenType.FAVOURITE_MOVIES -> stateFavouriteMovies.value = oneMovieDetails
+            else -> {}
         }
     }
 
@@ -102,14 +123,15 @@ class MoviesRepositoryImpl(
         runCatching {
             if (movieDao.isMovieFavourite(movie.id)) {
                 movieDao.removeMovie(movie.id)
-                state.value = MoviesState.FavouriteStatus(false)
+                stateMovieDetails.value = MoviesState.FavouriteStatus(false)
             } else {
                 movieDao.insertMovie(moviesMapper.mapEntityToDbModel(movie))
-                state.value = MoviesState.FavouriteStatus(true)
+                stateMovieDetails.value = MoviesState.FavouriteStatus(true)
             }
         }.onFailure {
-            state.value = getError(it)
+            stateMovieDetails.value = getError(it)
         }
+        resetState(ScreenType.MOVIE_DETAILS)
     }
 
     private fun <T> getError(response: Response<T>): MoviesState.Error {

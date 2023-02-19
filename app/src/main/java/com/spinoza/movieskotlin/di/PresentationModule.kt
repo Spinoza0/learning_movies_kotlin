@@ -11,7 +11,8 @@ val presentationModule = module {
     viewModel<MoviesViewModel> {
         MoviesViewModel(
             getStateUseCase = get(),
-            loadMoviesUseCase = get(),
+            loadAllMoviesUseCase = get(),
+            loadMovieDetailsUseCase = get(),
             getMoviesFromCacheUseCase = get()
         )
     }
@@ -19,14 +20,14 @@ val presentationModule = module {
     viewModel<FavouriteMoviesViewModel> {
         FavouriteMoviesViewModel(
             getStateUseCase = get(),
-            getAllFavouritesMoviesUseCase = get()
+            getAllFavouritesMoviesUseCase = get(),
+            loadMovieDetailsUseCase = get()
         )
     }
 
     viewModel<MovieDetailViewModel> {
         MovieDetailViewModel(
             getStateUseCase = get(),
-            loadOneMovieUseCase = get(),
             changeFavouriteStatusUseCase = get()
         )
     }

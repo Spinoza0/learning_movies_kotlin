@@ -9,6 +9,7 @@ import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.spinoza.movieskotlin.R
 import com.spinoza.movieskotlin.databinding.ActivityMoviesBinding
+import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
 import com.spinoza.movieskotlin.presentation.adapter.MoviesAdapter
 import com.spinoza.movieskotlin.presentation.viewmodel.MoviesViewModel
@@ -43,15 +44,14 @@ class MoviesActivity : AppCompatActivity() {
             }
 
             when (it) {
-                is MoviesState.Error -> {
-                    Toast.makeText(this, it.value, Toast.LENGTH_LONG).show()
-                }
-                is MoviesState.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is MoviesState.Movies -> {
-                    moviesAdapter.submitList(it.items)
-                }
+                is MoviesState.Error -> Toast.makeText(
+                    this,
+                    it.value,
+                    Toast.LENGTH_LONG
+                ).show()
+                is MoviesState.Loading -> binding.progressBar.visibility = View.VISIBLE
+                is MoviesState.Movies -> moviesAdapter.submitList(it.items)
+                is MoviesState.OneMovieDetails -> showMoviesDetails(it.value)
                 else -> {}
             }
         }
@@ -60,16 +60,16 @@ class MoviesActivity : AppCompatActivity() {
     private fun setupRecyclerView(binding: ActivityMoviesBinding) {
         binding.recyclerViewMovies.adapter = moviesAdapter
         binding.recyclerViewMovies.layoutManager = GridLayoutManager(this, 2)
-        moviesAdapter.onMovieClickListener = {
-            val intent = MovieDetailActivity.newIntent(
-                this@MoviesActivity,
-                it
-            )
-            startActivity(intent)
-        }
-        moviesAdapter.onReachEndListener = {
-            viewModel.loadMovies()
-        }
+        moviesAdapter.onMovieClickListener = { viewModel.loadOneMovie(it) }
+        moviesAdapter.onReachEndListener = { viewModel.loadMovies() }
+    }
+
+    private fun showMoviesDetails(movieDetails: MovieDetails) {
+        val intent = MovieDetailActivity.newIntent(
+            this@MoviesActivity,
+            movieDetails
+        )
+        startActivity(intent)
     }
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
