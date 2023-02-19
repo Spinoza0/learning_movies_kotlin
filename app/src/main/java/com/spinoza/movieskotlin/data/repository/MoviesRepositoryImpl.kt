@@ -38,18 +38,16 @@ class MoviesRepositoryImpl(
     }
 
     override suspend fun loadAllMovies() {
-        if (stateAllMovies.value != MoviesState.Loading) {
-            stateAllMovies.value = MoviesState.Loading
-            val response = moviesApiService.loadMovies(page)
-            if (response.isSuccessful) {
-                page++
-                response.body()?.let {
-                    allMovies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
-                }
-                stateAllMovies.value = MoviesState.Movies(allMovies.toList())
-            } else {
-                stateAllMovies.value = getError(response)
+        stateAllMovies.value = MoviesState.Loading
+        val response = moviesApiService.loadMovies(page)
+        if (response.isSuccessful) {
+            page++
+            response.body()?.let {
+                allMovies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
             }
+            stateAllMovies.value = MoviesState.Movies(allMovies.toList())
+        } else {
+            stateAllMovies.value = getError(response)
         }
     }
 
@@ -64,6 +62,12 @@ class MoviesRepositoryImpl(
     }
 
     override suspend fun loadMovieDetails(movie: Movie, screenType: ScreenType) {
+        when (screenType) {
+            ScreenType.ALL_MOVIES -> stateAllMovies.value = MoviesState.Loading
+            ScreenType.FAVOURITE_MOVIES -> stateFavouriteMovies.value = MoviesState.Loading
+            else -> {}
+        }
+
         val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
         val oneMovieDetails = if (oneMovieResponse.isSuccessful) {
             var newMovie = movie
