@@ -35,7 +35,7 @@ val domainModule = module {
         LoadAllMoviesUseCase(moviesRepository = get())
     }
 
-    factory<GetMoviesFromCacheUseCase> {
-        GetMoviesFromCacheUseCase(moviesRepository = get())
+    factory<ResetStateUseCase> {
+        ResetStateUseCase(moviesRepository = get())
     }
 }

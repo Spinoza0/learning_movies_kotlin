@@ -25,13 +25,10 @@ class MoviesActivity : AppCompatActivity() {
         )
     }
     private val moviesAdapter by lazy { MoviesAdapter() }
-    private var needReloadList = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        savedInstanceState?.let { needReloadList = it.getBoolean(NEED_RELOAD_LIST) }
 
         setupRecyclerView(binding)
         setupObservers()
@@ -87,17 +84,6 @@ class MoviesActivity : AppCompatActivity() {
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(NEED_RELOAD_LIST, true)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (needReloadList) {
-            viewModel.onResume()
-        }
-    }
-
-    companion object {
-        private const val NEED_RELOAD_LIST = "need_resume"
+        viewModel.resetState()
     }
 }

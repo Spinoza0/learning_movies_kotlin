@@ -4,17 +4,17 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.spinoza.movieskotlin.domain.model.Movie
 import com.spinoza.movieskotlin.domain.model.ScreenType
-import com.spinoza.movieskotlin.domain.usecase.GetMoviesFromCacheUseCase
 import com.spinoza.movieskotlin.domain.usecase.GetStateUseCase
 import com.spinoza.movieskotlin.domain.usecase.LoadAllMoviesUseCase
 import com.spinoza.movieskotlin.domain.usecase.LoadMovieDetailsUseCase
+import com.spinoza.movieskotlin.domain.usecase.ResetStateUseCase
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(
     getStateUseCase: GetStateUseCase,
+    private val resetStateUseCase: ResetStateUseCase,
     private val loadAllMoviesUseCase: LoadAllMoviesUseCase,
     private val loadMovieDetailsUseCase: LoadMovieDetailsUseCase,
-    private val getMoviesFromCacheUseCase: GetMoviesFromCacheUseCase,
 ) : ViewModel() {
 
     val state = getStateUseCase(SCREEN_TYPE)
@@ -29,9 +29,9 @@ class MoviesViewModel(
         }
     }
 
-    fun onResume() {
+    fun resetState() {
         viewModelScope.launch {
-            getMoviesFromCacheUseCase()
+            resetStateUseCase(SCREEN_TYPE)
         }
     }
 

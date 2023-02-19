@@ -31,9 +31,9 @@ class MoviesRepositoryImpl(
         ScreenType.MOVIE_DETAILS -> stateMovieDetails
     }
 
-    override fun resetState(screenType: ScreenType) = when (screenType) {
-        ScreenType.ALL_MOVIES -> stateAllMovies.value = MoviesState.Empty
-        ScreenType.FAVOURITE_MOVIES -> stateFavouriteMovies.value = MoviesState.Empty
+    override suspend fun resetState(screenType: ScreenType) = when (screenType) {
+        ScreenType.ALL_MOVIES -> stateAllMovies.value = MoviesState.Movies(allMovies.toList())
+        ScreenType.FAVOURITE_MOVIES -> getAllFavouriteMovies()
         ScreenType.MOVIE_DETAILS -> stateMovieDetails.value = MoviesState.Empty
     }
 
@@ -51,10 +51,6 @@ class MoviesRepositoryImpl(
                 stateAllMovies.value = getError(response)
             }
         }
-    }
-
-    override suspend fun getMoviesFromCache() {
-        stateAllMovies.value = MoviesState.Movies(allMovies.toList())
     }
 
     override suspend fun getAllFavouriteMovies() {
