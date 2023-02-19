@@ -68,9 +68,8 @@ class MoviesRepositoryImpl(
     }
 
     override suspend fun loadMovieDetails(movie: Movie, screenType: ScreenType) {
-        val oneMovieDetails: MoviesState.OneMovieDetails
         val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
-        if (oneMovieResponse.isSuccessful) {
+        val oneMovieDetails = if (oneMovieResponse.isSuccessful) {
             var newMovie = movie
             oneMovieResponse.body()?.let {
                 newMovie = moviesMapper.mapDtoToEntity(it)
@@ -87,7 +86,7 @@ class MoviesRepositoryImpl(
                 listOf()
             }
 
-            oneMovieDetails = MoviesState.OneMovieDetails(
+            MoviesState.OneMovieDetails(
                 MovieDetails(
                     newMovie,
                     isMovieFavourite(newMovie.id),
@@ -96,7 +95,7 @@ class MoviesRepositoryImpl(
                 )
             )
         } else {
-            oneMovieDetails = MoviesState.OneMovieDetails(
+            MoviesState.OneMovieDetails(
                 MovieDetails(
                     movie,
                     isMovieFavourite(movie.id),
@@ -121,13 +120,15 @@ class MoviesRepositoryImpl(
 
     override suspend fun changeFavouriteStatus(movie: Movie) {
         runCatching {
-            if (movieDao.isMovieFavourite(movie.id)) {
+            val status = if (movieDao.isMovieFavourite(movie.id)) {
                 movieDao.removeMovie(movie.id)
-                stateMovieDetails.value = MoviesState.FavouriteStatus(false)
+                MoviesState.FavouriteStatus(false)
             } else {
                 movieDao.insertMovie(moviesMapper.mapEntityToDbModel(movie))
-                stateMovieDetails.value = MoviesState.FavouriteStatus(true)
+                MoviesState.FavouriteStatus(true)
             }
+            stateMovieDetails.value = status
+            stateFavouriteMovies.value = status
         }.onFailure {
             stateMovieDetails.value = getError(it)
         }
