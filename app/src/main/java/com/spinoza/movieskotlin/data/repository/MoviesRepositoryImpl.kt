@@ -39,15 +39,19 @@ class MoviesRepositoryImpl(
 
     override suspend fun loadAllMovies() {
         stateAllMovies.value = MoviesState.Loading
-        val response = moviesApiService.loadMovies(page)
-        if (response.isSuccessful) {
-            page++
-            response.body()?.let {
-                allMovies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
+        runCatching {
+            val response = moviesApiService.loadMovies(page)
+            if (response.isSuccessful) {
+                page++
+                response.body()?.let {
+                    allMovies.addAll(moviesMapper.mapMoviesDtoToEntity(it.movies))
+                }
+                stateAllMovies.value = MoviesState.Movies(allMovies.toList())
+            } else {
+                stateAllMovies.value = getError(response)
             }
-            stateAllMovies.value = MoviesState.Movies(allMovies.toList())
-        } else {
-            stateAllMovies.value = getError(response)
+        }.onFailure {
+            stateAllMovies.value = getError(it)
         }
     }
 
@@ -68,41 +72,43 @@ class MoviesRepositoryImpl(
             else -> {}
         }
 
-        val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
-        val oneMovieDetails = if (oneMovieResponse.isSuccessful) {
-            var newMovie = movie
-            oneMovieResponse.body()?.let {
-                newMovie = moviesMapper.mapDtoToEntity(it)
-            }
-
-            val links = moviesMapper.mapLinksDtoToEntity(
-                oneMovieResponse.body()?.linkItemsList?.items ?: listOf()
-            )
-
-            val reviewsResponse = moviesApiService.loadReviews(movie.id)
-            val reviews = if (reviewsResponse.isSuccessful) {
-                moviesMapper.mapReviewsDtoToEntity(reviewsResponse.body()?.reviews ?: listOf())
-            } else {
+        var oneMovieDetails = MoviesState.OneMovieDetails(
+            MovieDetails(
+                movie,
+                isMovieFavourite(movie.id),
+                listOf(),
                 listOf()
-            }
+            )
+        )
 
-            MoviesState.OneMovieDetails(
-                MovieDetails(
-                    newMovie,
-                    isMovieFavourite(newMovie.id),
-                    links,
-                    reviews
+        runCatching {
+            val oneMovieResponse = moviesApiService.loadOneMovie(movie.id)
+            if (oneMovieResponse.isSuccessful) {
+                var newMovie = movie
+                oneMovieResponse.body()?.let {
+                    newMovie = moviesMapper.mapDtoToEntity(it)
+                }
+
+                val links = moviesMapper.mapLinksDtoToEntity(
+                    oneMovieResponse.body()?.linkItemsList?.items ?: listOf()
                 )
-            )
-        } else {
-            MoviesState.OneMovieDetails(
-                MovieDetails(
-                    movie,
-                    isMovieFavourite(movie.id),
-                    listOf(),
+
+                val reviewsResponse = moviesApiService.loadReviews(movie.id)
+                val reviews = if (reviewsResponse.isSuccessful) {
+                    moviesMapper.mapReviewsDtoToEntity(reviewsResponse.body()?.reviews ?: listOf())
+                } else {
                     listOf()
+                }
+
+                oneMovieDetails = MoviesState.OneMovieDetails(
+                    MovieDetails(
+                        newMovie,
+                        isMovieFavourite(newMovie.id),
+                        links,
+                        reviews
+                    )
                 )
-            )
+            }
         }
 
         when (screenType) {
