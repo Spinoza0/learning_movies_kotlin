@@ -25,6 +25,7 @@
             android:id="@+id/textViewName"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
             android:padding="8dp"
             android:textSize="24sp"
             android:textStyle="bold"
@@ -78,6 +79,19 @@
             app:layout_constraintEnd_toEndOf="@id/imageViewPoster"
             app:layout_constraintTop_toBottomOf="@id/imageViewPoster"
             tools:srcCompat="@android:drawable/btn_star_big_on" />
+
+        <TextView
+            android:id="@+id/textViewRating"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            android:textColor="@android:color/white"
+            android:textSize="14sp"
+            app:layout_constraintBottom_toBottomOf="@id/imageViewPoster"
+            app:layout_constraintStart_toStartOf="@id/imageViewPoster"
+            app:layout_constraintTop_toBottomOf="@id/imageViewPoster"
+            tools:background="@drawable/circle_green"
+            tools:text="8.1" />
 
     </androidx.constraintlayout.widget.ConstraintLayout>
 
