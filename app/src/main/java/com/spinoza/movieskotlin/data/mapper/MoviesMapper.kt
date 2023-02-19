@@ -8,8 +8,14 @@ import com.spinoza.movieskotlin.data.network.model.reviews.ReviewDto
 import com.spinoza.movieskotlin.domain.model.Link
 import com.spinoza.movieskotlin.domain.model.Movie
 import com.spinoza.movieskotlin.domain.model.Review
+import java.util.*
 
 class MoviesMapper {
+
+    private val convertRating = { rating: Double ->
+        String.format(Locale.getDefault(), "%.1f", rating)
+    }
+
 
     private fun mapDtoToEntity(movieDto: MovieDto): Movie {
         return Movie(
@@ -19,6 +25,7 @@ class MoviesMapper {
             description = movieDto.description,
             poster = movieDto.poster.url,
             rating = movieDto.rating.kinopoiskRating,
+            ratingText = convertRating(movieDto.rating.kinopoiskRating)
         )
     }
 
@@ -30,6 +37,7 @@ class MoviesMapper {
             description = movieResponseDto.description,
             poster = movieResponseDto.poster.url,
             rating = movieResponseDto.rating.kinopoiskRating,
+            ratingText = convertRating(movieResponseDto.rating.kinopoiskRating)
         )
     }
 
@@ -63,6 +71,7 @@ class MoviesMapper {
         description = movieDbModel.description,
         poster = movieDbModel.poster,
         rating = movieDbModel.rating,
+        ratingText = convertRating(movieDbModel.rating)
     )
 
     fun mapDbModelToEntity(moviesDbModel: List<MovieDbModel>): List<Movie> =

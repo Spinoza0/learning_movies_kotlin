@@ -14,6 +14,7 @@ import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
 import com.spinoza.movieskotlin.presentation.adapter.LinksAdapter
 import com.spinoza.movieskotlin.presentation.adapter.ReviewsAdapter
+import com.spinoza.movieskotlin.presentation.utils.setupTextViewRating
 import com.spinoza.movieskotlin.presentation.viewmodel.MovieDetailViewModel
 import org.koin.androidx.viewmodel.ext.android.viewModel
 
@@ -74,12 +75,14 @@ class MovieDetailActivity : AppCompatActivity() {
             Glide.with(this@MovieDetailActivity)
                 .load(movieDetails.movie.poster)
                 .into(imageViewPoster)
+            setupTextViewRating(this@MovieDetailActivity, textViewRating, movieDetails.movie)
             textViewName.text = movieDetails.movie.name
             textViewYear.text = movieDetails.movie.year.toString()
             textViewDescription.text = movieDetails.movie.description
             setupImageViewStar(movieDetails.isFavourite)
             linksAdapter.submitList(movieDetails.links)
             reviewsAdapter.submitList(movieDetails.reviews)
+            scrollView.parent.requestChildFocus(scrollView, scrollView)
         }
 
         setupObservers()
