@@ -80,6 +80,7 @@ class MovieDetailActivity : AppCompatActivity() {
             setupImageViewStar(movieDetails.isFavourite)
             linksAdapter.submitList(movieDetails.links)
             reviewsAdapter.submitList(movieDetails.reviews)
+            scrollView.parent.requestChildFocus(scrollView, scrollView)
         }
 
         setupObservers()
