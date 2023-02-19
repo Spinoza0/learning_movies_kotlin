@@ -8,6 +8,7 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.GridLayoutManager
 import com.spinoza.movieskotlin.databinding.ActivityFavouriteMoviesBinding
+import com.spinoza.movieskotlin.domain.model.MovieDetails
 import com.spinoza.movieskotlin.domain.model.MoviesState
 import com.spinoza.movieskotlin.presentation.adapter.MoviesAdapter
 import com.spinoza.movieskotlin.presentation.viewmodel.FavouriteMoviesViewModel
@@ -23,13 +24,10 @@ class FavouriteMoviesActivity : AppCompatActivity() {
         )
     }
     private val moviesAdapter by lazy { MoviesAdapter() }
-    private var needReloadList = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(binding.root)
-
-        savedInstanceState?.let { needReloadList = it.getBoolean(NEED_RELOAD_LIST) }
 
         setupRecyclerView(binding)
         setupObservers()
@@ -42,16 +40,15 @@ class FavouriteMoviesActivity : AppCompatActivity() {
             }
 
             when (it) {
-                is MoviesState.Error -> {
-                    Toast.makeText(this, it.value, Toast.LENGTH_LONG).show()
-                }
-                is MoviesState.Loading -> {
-                    binding.progressBar.visibility = View.VISIBLE
-                }
-                is MoviesState.FavouriteMovies -> {
-                    moviesAdapter.submitList(it.items)
-                }
-                is MoviesState.FavouriteStatus -> viewModel.loadMovies()
+                is MoviesState.Error -> Toast.makeText(
+                    this,
+                    it.value,
+                    Toast.LENGTH_LONG
+                ).show()
+                is MoviesState.Loading -> binding.progressBar.visibility = View.VISIBLE
+                is MoviesState.FavouriteMovies -> moviesAdapter.submitList(it.items)
+                is MoviesState.FavouriteStatus -> viewModel.loadAllMovies()
+                is MoviesState.OneMovieDetails -> showMoviesDetails(it.value)
                 else -> {}
             }
         }
@@ -60,30 +57,23 @@ class FavouriteMoviesActivity : AppCompatActivity() {
     private fun setupRecyclerView(binding: ActivityFavouriteMoviesBinding) {
         binding.recyclerViewMovies.adapter = moviesAdapter
         binding.recyclerViewMovies.layoutManager = GridLayoutManager(this, 2)
-        moviesAdapter.onMovieClickListener = {
-            val intent: Intent = MovieDetailActivity.newIntent(
-                this@FavouriteMoviesActivity,
-                it
-            )
-            startActivity(intent)
-        }
+        moviesAdapter.onMovieClickListener = { viewModel.loadMovieDetails(it) }
+    }
+
+    private fun showMoviesDetails(movieDetails: MovieDetails) {
+        val intent = MovieDetailActivity.newIntent(
+            this@FavouriteMoviesActivity,
+            movieDetails
+        )
+        startActivity(intent)
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
-        outState.putBoolean(NEED_RELOAD_LIST, true)
-    }
-
-    override fun onResume() {
-        super.onResume()
-        if (needReloadList) {
-            viewModel.loadMovies()
-        }
+        viewModel.resetState()
     }
 
     companion object {
-        private const val NEED_RELOAD_LIST = "need_resume"
-
         fun newIntent(context: Context): Intent {
             return Intent(context, FavouriteMoviesActivity::class.java)
         }

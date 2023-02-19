@@ -2,18 +2,22 @@ package com.spinoza.movieskotlin.presentation.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.spinoza.movieskotlin.domain.usecase.GetMoviesFromCacheUseCase
+import com.spinoza.movieskotlin.domain.model.Movie
+import com.spinoza.movieskotlin.domain.model.ScreenType
 import com.spinoza.movieskotlin.domain.usecase.GetStateUseCase
-import com.spinoza.movieskotlin.domain.usecase.LoadMoviesUseCase
+import com.spinoza.movieskotlin.domain.usecase.LoadAllMoviesUseCase
+import com.spinoza.movieskotlin.domain.usecase.LoadMovieDetailsUseCase
+import com.spinoza.movieskotlin.domain.usecase.ResetStateUseCase
 import kotlinx.coroutines.launch
 
 class MoviesViewModel(
     getStateUseCase: GetStateUseCase,
-    private val loadMoviesUseCase: LoadMoviesUseCase,
-    private val getMoviesFromCacheUseCase: GetMoviesFromCacheUseCase,
+    private val resetStateUseCase: ResetStateUseCase,
+    private val loadAllMoviesUseCase: LoadAllMoviesUseCase,
+    private val loadMovieDetailsUseCase: LoadMovieDetailsUseCase,
 ) : ViewModel() {
 
-    val state = getStateUseCase()
+    val state = getStateUseCase(SCREEN_TYPE)
 
     init {
         loadMovies()
@@ -21,13 +25,23 @@ class MoviesViewModel(
 
     fun loadMovies() {
         viewModelScope.launch {
-            loadMoviesUseCase()
+            loadAllMoviesUseCase()
         }
     }
 
-    fun onResume() {
+    fun resetState() {
         viewModelScope.launch {
-            getMoviesFromCacheUseCase()
+            resetStateUseCase(SCREEN_TYPE)
         }
+    }
+
+    fun loadOneMovie(movie: Movie) {
+        viewModelScope.launch {
+            loadMovieDetailsUseCase(movie, SCREEN_TYPE)
+        }
+    }
+
+    companion object {
+        private val SCREEN_TYPE = ScreenType.ALL_MOVIES
     }
 }

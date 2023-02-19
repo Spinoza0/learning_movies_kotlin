@@ -23,19 +23,19 @@ val domainModule = module {
         GetAllFavouritesMoviesUseCase(moviesRepository = get())
     }
 
-    factory<LoadOneMovieUseCase> {
-        LoadOneMovieUseCase(moviesRepository = get())
+    factory<LoadMovieDetailsUseCase> {
+        LoadMovieDetailsUseCase(moviesRepository = get())
     }
 
     factory<ChangeFavouriteStatusUseCase> {
         ChangeFavouriteStatusUseCase(moviesRepository = get())
     }
 
-    factory<LoadMoviesUseCase> {
-        LoadMoviesUseCase(moviesRepository = get())
+    factory<LoadAllMoviesUseCase> {
+        LoadAllMoviesUseCase(moviesRepository = get())
     }
 
-    factory<GetMoviesFromCacheUseCase> {
-        GetMoviesFromCacheUseCase(moviesRepository = get())
+    factory<ResetStateUseCase> {
+        ResetStateUseCase(moviesRepository = get())
     }
 }
